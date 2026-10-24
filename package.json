@@ -3,8 +3,9 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db:validate": "bunx prisma validate",
@@ -13,6 +14,10 @@
     "db:seed": "bun run prisma/seed.ts",
     "typecheck": "bunx tsc --noEmit"
   },
+  "trustedDependencies": [
+    "@prisma/client",
+    "prisma"
+  ],
   "prisma": {
     "seed": "bun run prisma/seed.ts"
   },
