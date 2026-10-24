@@ -1,0 +1,55 @@
+name: WealthyDashboard CI Pipeline (Bun)
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-and-typecheck:
+    name: Validate Prisma, Lint & TypeScript (Bun)
+    runs-on: ubuntu-latest
+
+    env:
+      POSTGRES_PRISMA_URL: "postgresql://dummy:dummy@localhost:5432/wealthydb?schema=public"
+      POSTGRES_URL_NON_POOLING: "postgresql://dummy:dummy@localhost:5432/wealthydb?schema=public"
+      JWT_SECRET: "ci_dummy_jwt_secret_key_minimum_32_characters_long"
+      APP_PASSCODE: "123456"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun Runtime
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache Bun Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb', '**/bun.lock', 'package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install Dependencies with Bun
+        run: bun install --frozen-lockfile
+
+      - name: Validate Prisma Schema
+        run: bunx prisma validate
+
+      - name: Generate Prisma Client
+        run: bunx prisma generate
+
+      - name: Run Next.js ESLint
+        run: bun run lint
+
+      - name: Run TypeScript Compiler Check
+        run: bunx tsc --noEmit
+

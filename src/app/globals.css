@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-canvas: #f4f5f7;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f8fafc;
+  --border-subtle: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --accent-primary: #1d4ed8;
+  --accent-lime: #a3e635;
+  --semantic-income: #15803d;
+  --semantic-expense: #b91c1c;
+}
+
+.dark {
+  --bg-canvas: #0b0f17;
+  --bg-surface: #151c28;
+  --bg-elevated: #1e293b;
+  --border-subtle: #263349;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-primary: #3b82f6;
+  --accent-lime: #bef264;
+  --semantic-income: #4ade80;
+  --semantic-expense: #f87171;
+}
+
+html,
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  overflow-x: hidden;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* View Transitions API Circular Reveal Reset */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
+/* Keyboard Accessibility Focus Indicator (WCAG 2.4.7 / R-32) */
+*:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
