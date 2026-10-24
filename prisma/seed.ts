@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../src/lib/password";
 
 const prisma = new PrismaClient();
 
@@ -15,6 +16,19 @@ const DEFAULT_WALLETS = [
 ];
 
 export async function runSeed() {
+  const adminUsername = (process.env.ADMIN_USERNAME ?? "admin").trim().toLowerCase();
+  const adminPassword = (process.env.ADMIN_PASSWORD ?? "admin123").trim();
+
+  await prisma.user.upsert({
+    where: { username: adminUsername },
+    update: {},
+    create: {
+      username: adminUsername,
+      passwordHash: hashPassword(adminPassword),
+      displayName: "Primary Account Owner",
+    },
+  });
+
   for (const wallet of DEFAULT_WALLETS) {
     await prisma.wallet.upsert({
       where: { name: wallet.name },
@@ -46,7 +60,9 @@ export async function runSeed() {
     },
   });
 
-  console.info("Seeded 9 primary wallets and default monthly budget setting.");
+  console.info(
+    `Seeded default user '${adminUsername}', 9 primary wallets, and default monthly budget setting.`
+  );
 }
 
 if (import.meta.main) {
@@ -59,4 +75,3 @@ if (import.meta.main) {
       await prisma.$disconnect();
     });
 }
-

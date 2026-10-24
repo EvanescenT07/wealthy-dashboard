@@ -40,6 +40,26 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Custom Scrollbar & Horizontal Slide Track Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
 /* View Transitions API Circular Reveal Reset */
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -60,4 +80,3 @@ body {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
-

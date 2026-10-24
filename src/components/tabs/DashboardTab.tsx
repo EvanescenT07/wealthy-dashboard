@@ -31,6 +31,8 @@ import {
   ErrorStateCard,
   SkeletonCard,
 } from "@/components/ui/SkeletonCard";
+import { Slider } from "@/components/ui/slider";
+import { SlidingTabs } from "@/components/ui/sliding-tabs";
 import { formatCompactIdr, formatIdr } from "@/lib/utils";
 
 export interface DashboardSummaryData {
@@ -280,6 +282,7 @@ export function DashboardTab({
     }
   };
 
+  const numericBudgetDraft = Number.parseFloat(budgetInput) || data.budget.monthlyLimitIdr;
   const gaugeClampedPct = Math.min(100, Math.max(0, data.budget.utilizationPct));
   const arcRadius = 72;
   const arcCircumference = Math.PI * arcRadius;
@@ -549,9 +552,9 @@ export function DashboardTab({
         </motion.article>
       </div>
 
-      {/* Middle Row: Monthly Budget Target Gauge + Monthly Income vs Expense Chart + Quick Export */}
+      {/* Middle Row: Monthly Budget Target Gauge + Monthly Income vs Expense Chart */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-        {/* 4. Monthly Budget Target Gauge (Dark Card) */}
+        {/* 4. Monthly Budget Target Gauge (Dark Card with Shadcn Slider) */}
         <motion.article
           variants={cardVariants}
           className="flex flex-col justify-between rounded-2xl bg-[#0F172A] p-6 text-white lg:col-span-4"
@@ -574,29 +577,53 @@ export function DashboardTab({
               className="inline-flex min-h-[38px] items-center gap-1 rounded-xl bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/20"
             >
               <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Edit Limit</span>
+              <span>{isEditingBudget ? "Close" : "Adjust Limit"}</span>
             </button>
           </div>
 
           {isEditingBudget && (
             <form
               onSubmit={handleSaveBudget}
-              className="mt-3 flex items-center gap-2 rounded-xl bg-slate-800/90 p-2.5"
+              className="mt-3 space-y-3 rounded-xl border border-slate-700 bg-slate-900/90 p-3.5"
             >
-              <input
-                type="number"
-                value={budgetInput}
-                onChange={(e) => setBudgetInput(e.target.value)}
-                aria-label="Monthly budget limit in IDR"
-                className="min-h-[40px] flex-1 rounded-lg border border-slate-600 bg-slate-900 px-3 py-1.5 text-xs font-bold tabular-nums text-white"
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-slate-300">
+                  Target Limit Slider
+                </span>
+                <span className="font-bold tabular-nums text-[#BEF264]">
+                  {formatIdr(numericBudgetDraft)}
+                </span>
+              </div>
+              <Slider
+                variant="dark"
+                min={1_000_000}
+                max={50_000_000}
+                step={500_000}
+                value={[
+                  Math.min(
+                    50_000_000,
+                    Math.max(1_000_000, numericBudgetDraft)
+                  ),
+                ]}
+                onValueChange={(vals) => setBudgetInput(String(vals[0]))}
+                aria-label="Slide monthly budget target in IDR"
               />
-              <button
-                type="submit"
-                disabled={isSavingBudget}
-                className="min-h-[40px] rounded-lg bg-[#A3E635] px-3 py-1.5 text-xs font-bold text-slate-950"
-              >
-                {isSavingBudget ? "..." : "Save"}
-              </button>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={budgetInput}
+                  onChange={(e) => setBudgetInput(e.target.value)}
+                  aria-label="Monthly budget limit in IDR"
+                  className="min-h-[40px] flex-1 rounded-lg border border-slate-600 bg-slate-950 px-3 py-1.5 text-xs font-bold tabular-nums text-white"
+                />
+                <button
+                  type="submit"
+                  disabled={isSavingBudget}
+                  className="min-h-[40px] rounded-lg bg-[#A3E635] px-3.5 py-1.5 text-xs font-bold text-slate-950 transition hover:opacity-95"
+                >
+                  {isSavingBudget ? "Saving..." : "Apply"}
+                </button>
+              </div>
             </form>
           )}
 
@@ -683,8 +710,8 @@ export function DashboardTab({
               </p>
             </div>
 
-            {/* Per-Chart Filter Controls */}
-            <div className="flex items-center gap-2">
+            {/* Per-Chart Filter Controls with SlidingTabs */}
+            <div className="flex flex-wrap items-center gap-2">
               <label htmlFor="overview-year-select" className="sr-only">
                 Select Chart Year
               </label>
@@ -701,30 +728,15 @@ export function DashboardTab({
                 ))}
               </select>
 
-              <div className="inline-flex rounded-xl border border-borderSubtle bg-elevated p-1">
-                <button
-                  type="button"
-                  onClick={() => setMonthRange("6M")}
-                  className={`min-h-[34px] rounded-lg px-3 py-1 text-xs font-semibold transition ${
-                    monthRange === "6M"
-                      ? "bg-accentPrimary text-white"
-                      : "text-textSecondary hover:text-textPrimary"
-                  }`}
-                >
-                  6 Month
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMonthRange("12M")}
-                  className={`min-h-[34px] rounded-lg px-3 py-1 text-xs font-semibold transition ${
-                    monthRange === "12M"
-                      ? "bg-accentPrimary text-white"
-                      : "text-textSecondary hover:text-textPrimary"
-                  }`}
-                >
-                  12 Month
-                </button>
-              </div>
+              <SlidingTabs
+                layoutGroupId="dashboardMonthRangeSlide"
+                value={monthRange}
+                onChange={setMonthRange}
+                options={[
+                  { value: "6M", label: "6 Month" },
+                  { value: "12M", label: "12 Month" },
+                ]}
+              />
             </div>
           </div>
 
@@ -949,4 +961,3 @@ export function DashboardTab({
     </motion.div>
   );
 }
-

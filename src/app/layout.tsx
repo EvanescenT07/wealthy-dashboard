@@ -20,6 +20,13 @@ export const metadata: Metadata = {
   title: "WealthyDashboard | Personal Finance & Multi-Wallet Analytics",
   description:
     "Responsive personal finance dashboard with non-destructive Excel import, hybrid manual wallet balance management, and layered cashflow analytics.",
+  icons: {
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
@@ -39,4 +46,3 @@ export default function RootLayout({
     </html>
   );
 }
-

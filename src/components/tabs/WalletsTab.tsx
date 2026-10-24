@@ -4,8 +4,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Edit3,
-  Eye,
-  EyeOff,
   Layers,
   Sliders,
   Wallet as WalletIcon,
@@ -16,6 +14,8 @@ import {
   ErrorStateCard,
   SkeletonCard,
 } from "@/components/ui/SkeletonCard";
+import { SlidingTabs } from "@/components/ui/sliding-tabs";
+import { Switch } from "@/components/ui/switch";
 import { formatIdr } from "@/lib/utils";
 
 export interface EnrichedWallet {
@@ -181,38 +181,26 @@ export function WalletsTab({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="inline-flex flex-wrap rounded-xl border border-borderSubtle bg-elevated p-1">
-            {(
-              [
-                { key: "all", label: `All (${wallets.length})` },
-                {
-                  key: "default",
-                  label: `Primary 9 (${wallets.filter((w) => w.isDefault).length})`,
-                },
-                {
-                  key: "dynamic",
-                  label: `Excel Dynamic (${wallets.filter((w) => !w.isDefault).length})`,
-                },
-                {
-                  key: "hidden",
-                  label: `Hidden (${wallets.filter((w) => !w.isVisible).length})`,
-                },
-              ] as const
-            ).map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setFilterMode(tab.key)}
-                className={`min-h-[38px] rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                  filterMode === tab.key
-                    ? "bg-accentPrimary text-white"
-                    : "text-textSecondary hover:text-textPrimary"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <SlidingTabs
+            layoutGroupId="walletFilterModeSlide"
+            value={filterMode}
+            onChange={setFilterMode}
+            options={[
+              { value: "all", label: `All (${wallets.length})` },
+              {
+                value: "default",
+                label: `Primary 9 (${wallets.filter((w) => w.isDefault).length})`,
+              },
+              {
+                value: "dynamic",
+                label: `Excel Dynamic (${wallets.filter((w) => !w.isDefault).length})`,
+              },
+              {
+                value: "hidden",
+                label: `Hidden (${wallets.filter((w) => !w.isVisible).length})`,
+              },
+            ]}
+          />
 
           <button
             type="button"
@@ -275,29 +263,15 @@ export function WalletsTab({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      disabled={togglingId === wallet.id}
-                      onClick={() => handleToggleVisibility(wallet)}
-                      aria-label={
-                        wallet.isVisible
-                          ? `Hide ${wallet.name} from Total Balance`
-                          : `Show ${wallet.name} in Total Balance`
-                      }
-                      title={
-                        wallet.isVisible
-                          ? "Visible in Total Balance"
-                          : "Hidden from Total Balance"
-                      }
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-borderSubtle bg-elevated text-textSecondary transition hover:text-textPrimary"
-                    >
-                      {wallet.isVisible ? (
-                        <Eye className="h-4 w-4 text-accentPrimary" />
-                      ) : (
-                        <EyeOff className="h-4 w-4" />
-                      )}
-                    </button>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <Switch
+                        checked={wallet.isVisible}
+                        disabled={togglingId === wallet.id}
+                        onCheckedChange={() => handleToggleVisibility(wallet)}
+                        aria-label={`Include ${wallet.name} in Total Balance`}
+                      />
+                    </div>
 
                     <button
                       type="button"
@@ -380,4 +354,3 @@ export function WalletsTab({
     </div>
   );
 }
-

@@ -8,9 +8,10 @@ import {
   FileText,
   LayoutDashboard,
   ListOrdered,
-  Lock,
+  LogOut,
   Wallet,
 } from "lucide-react";
+import { BrandLogoSvg } from "@/components/ui/BrandAssets";
 import { ThemeToggleCircular } from "./ThemeToggleCircular";
 
 export type DashboardTabKey =
@@ -48,11 +49,9 @@ export function TopPillNavbar({
   return (
     <header className="sticky top-0 z-30 border-b border-borderSubtle bg-canvas/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-        {/* Brand Identity */}
+        {/* Brand Identity with Custom SVG Asset */}
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accentPrimary font-bold text-white">
-            W
-          </div>
+          <BrandLogoSvg className="h-10 w-10 shrink-0 shadow-sm" />
           <div>
             <span className="text-base font-bold tracking-tight text-textPrimary sm:text-lg">
               WealthyDashboard
@@ -101,7 +100,7 @@ export function TopPillNavbar({
           })}
         </nav>
 
-        {/* Action Controls: Quick Import, Circular Theme Reveal, Lock Session */}
+        {/* Action Controls: Quick Import, Circular Theme Reveal, Sign Out */}
         <div className="order-2 flex items-center gap-2 lg:order-3">
           <button
             type="button"
@@ -117,15 +116,14 @@ export function TopPillNavbar({
           <button
             type="button"
             onClick={onLogout}
-            aria-label="Lock and sign out of session"
-            title="Lock dashboard"
+            aria-label="Sign out of session"
+            title="Sign out"
             className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-borderSubtle bg-surface text-textSecondary transition hover:bg-elevated hover:text-semanticExpense"
           >
-            <Lock className="h-4 w-4" aria-hidden="true" />
+            <LogOut className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
       </div>
     </header>
   );
 }
-

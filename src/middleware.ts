@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 
-const PUBLIC_API_PATHS = new Set(["/api/auth/login", "/api/template/excel"]);
+const PUBLIC_API_PATHS = new Set([
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/template/excel",
+]);
+
+const PUBLIC_PAGE_PATHS = new Set(["/login", "/register"]);
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -9,6 +15,8 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
+    pathname.startsWith("/logo.svg") ||
+    pathname.startsWith("/icon.svg") ||
     pathname.startsWith("/templates")
   ) {
     return NextResponse.next();
@@ -30,7 +38,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname === "/login") {
+  if (PUBLIC_PAGE_PATHS.has(pathname)) {
     if (session) {
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -47,4 +55,3 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
-

@@ -10,13 +10,23 @@ function getJwtSecretKey(): Uint8Array {
 
 export interface SessionPayload {
   authenticated: boolean;
+  userId: string;
+  username: string;
   iat?: number;
   exp?: number;
 }
 
-export async function signSessionToken(): Promise<string> {
-  return new SignJWT({ authenticated: true })
+export async function signSessionToken(user: {
+  id: string;
+  username: string;
+}): Promise<string> {
+  return new SignJWT({
+    authenticated: true,
+    userId: user.id,
+    username: user.username,
+  })
     .setProtectedHeader({ alg: "HS256" })
+    .setSubject(user.id)
     .setIssuedAt()
     .setExpirationTime("7d")
     .sign(getJwtSecretKey());
@@ -32,9 +42,15 @@ export async function verifySessionToken(
     const { payload } = await jwtVerify(token, getJwtSecretKey(), {
       algorithms: ["HS256"],
     });
-    if (payload.authenticated === true) {
+    if (
+      payload.authenticated === true &&
+      typeof payload.userId === "string" &&
+      typeof payload.username === "string"
+    ) {
       return {
         authenticated: true,
+        userId: payload.userId,
+        username: payload.username,
         iat: payload.iat,
         exp: payload.exp,
       };
@@ -49,9 +65,3 @@ export async function verifySessionToken(
     return null;
   }
 }
-
-export function verifyAppPasscode(inputPasscode: string): boolean {
-  const configuredPasscode = process.env.APP_PASSCODE ?? "123456";
-  return inputPasscode.trim() === configuredPasscode.trim();
-}
-

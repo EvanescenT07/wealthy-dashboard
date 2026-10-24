@@ -19,6 +19,7 @@ import {
   ErrorStateCard,
   SkeletonCard,
 } from "@/components/ui/SkeletonCard";
+import { SlidingTabs } from "@/components/ui/sliding-tabs";
 import { GlobalFilterState } from "@/components/layout/GlobalFilterBar";
 import { formatIdr } from "@/lib/utils";
 
@@ -92,13 +93,11 @@ export function TransactionsTab({
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [page, setPage] = useState(1);
 
-  // Sync pillType with global filter when global filter changes
   useEffect(() => {
     setPillType(globalFilters.type);
     setPage(1);
   }, [globalFilters.type]);
 
-  // 300ms Debounce for search bar
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchInput.trim());
@@ -278,52 +277,33 @@ export function TransactionsTab({
         </article>
       </div>
 
-      {/* Filter Pills, Search Bar (300ms debounce), & View Switcher */}
+      {/* Sliding Filter Pills, Search Bar (300ms debounce), & Sliding View Switcher */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-borderSubtle bg-surface p-4">
-        <div className="inline-flex flex-wrap items-center gap-1.5 rounded-xl bg-elevated p-1">
-          <button
-            type="button"
-            onClick={() => {
-              setPillType("ALL");
-              setPage(1);
-            }}
-            className={`min-h-[38px] rounded-lg px-3.5 py-1.5 text-xs font-semibold tabular-nums transition ${
-              pillType === "ALL"
-                ? "bg-accentPrimary text-white"
-                : "text-textSecondary hover:text-textPrimary"
-            }`}
-          >
-            All ({data.counts.all})
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setPillType("INCOME");
-              setPage(1);
-            }}
-            className={`min-h-[38px] rounded-lg px-3.5 py-1.5 text-xs font-semibold tabular-nums transition ${
-              pillType === "INCOME"
-                ? "bg-semanticIncome text-white"
-                : "text-textSecondary hover:text-textPrimary"
-            }`}
-          >
-            Income ({data.counts.income})
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setPillType("EXPENSE");
-              setPage(1);
-            }}
-            className={`min-h-[38px] rounded-lg px-3.5 py-1.5 text-xs font-semibold tabular-nums transition ${
-              pillType === "EXPENSE"
-                ? "bg-semanticExpense text-white"
-                : "text-textSecondary hover:text-textPrimary"
-            }`}
-          >
-            Expense ({data.counts.expense})
-          </button>
-        </div>
+        <SlidingTabs
+          layoutGroupId="txTypeFilterSlide"
+          value={pillType}
+          onChange={(next) => {
+            setPillType(next);
+            setPage(1);
+          }}
+          options={[
+            {
+              value: "ALL",
+              label: `All (${data.counts.all})`,
+              tone: "primary",
+            },
+            {
+              value: "INCOME",
+              label: `Income (${data.counts.income})`,
+              tone: "income",
+            },
+            {
+              value: "EXPENSE",
+              label: `Expense (${data.counts.expense})`,
+              tone: "expense",
+            },
+          ]}
+        />
 
         <div className="flex flex-1 flex-wrap items-center justify-end gap-3">
           <div className="relative min-w-[220px] flex-1 sm:max-w-xs">
@@ -341,34 +321,31 @@ export function TransactionsTab({
             />
           </div>
 
-          <div className="inline-flex rounded-xl border border-borderSubtle bg-elevated p-1">
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              aria-label="Table View"
-              className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-semibold transition ${
-                viewMode === "table"
-                  ? "bg-surface text-textPrimary shadow-sm"
-                  : "text-textSecondary hover:text-textPrimary"
-              }`}
-            >
-              <List className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Table View</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("cards")}
-              aria-label="Cards View"
-              className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-semibold transition ${
-                viewMode === "cards"
-                  ? "bg-surface text-textPrimary shadow-sm"
-                  : "text-textSecondary hover:text-textPrimary"
-              }`}
-            >
-              <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Cards View</span>
-            </button>
-          </div>
+          <SlidingTabs
+            layoutGroupId="txViewModeSlide"
+            value={viewMode}
+            onChange={setViewMode}
+            options={[
+              {
+                value: "table",
+                label: (
+                  <>
+                    <List className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Table View</span>
+                  </>
+                ),
+              },
+              {
+                value: "cards",
+                label: (
+                  <>
+                    <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Cards View</span>
+                  </>
+                ),
+              },
+            ]}
+          />
         </div>
       </div>
 
@@ -570,4 +547,3 @@ export function TransactionsTab({
     </div>
   );
 }
-

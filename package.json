@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "@prisma/client": "^6.4.1",
+    "@radix-ui/react-slider": "^1.6.1",
+    "@radix-ui/react-switch": "^1.4.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.4.7",
@@ -45,4 +47,3 @@
     "typescript": "^5.7.3"
   }
 }
-

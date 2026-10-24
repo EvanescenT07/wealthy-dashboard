@@ -1,7 +1,7 @@
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+  url       = env("DATABASE_PRISMA_DATABASE_URL")
+  directUrl = env("DATABASE_POSTGRES_URL")
 }
 
 generator client {
@@ -11,6 +11,15 @@ generator client {
 enum TransactionType {
   INCOME
   EXPENSE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  displayName  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Wallet {
@@ -64,4 +73,3 @@ model ImportLog {
   skippedCount  Int
   importedAt    DateTime @default(now())
 }
-

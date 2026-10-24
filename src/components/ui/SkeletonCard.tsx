@@ -2,6 +2,7 @@
 
 import React from "react";
 import { AlertCircle, FileSpreadsheet, RotateCcw } from "lucide-react";
+import { EmptyLedgerIllustrationSvg } from "./BrandAssets";
 
 interface SkeletonCardProps {
   lines?: number;
@@ -52,10 +53,8 @@ export function EmptyStateCard({
   onResetFilterClick,
 }: EmptyStateCardProps) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-borderSubtle bg-surface px-6 py-12 text-center">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-elevated text-accentPrimary">
-        <FileSpreadsheet className="h-6 w-6" aria-hidden="true" />
-      </div>
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-borderSubtle bg-surface px-6 py-10 text-center">
+      <EmptyLedgerIllustrationSvg className="mb-3 h-24 w-32" />
       <h3 className="text-base font-semibold text-textPrimary">{title}</h3>
       <p className="mt-1.5 max-w-md text-sm text-textSecondary">{description}</p>
       <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
@@ -116,4 +115,3 @@ export function ErrorStateCard({
     </div>
   );
 }
-

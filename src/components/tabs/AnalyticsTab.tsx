@@ -30,6 +30,7 @@ import {
   ErrorStateCard,
   SkeletonCard,
 } from "@/components/ui/SkeletonCard";
+import { SlidingTabs } from "@/components/ui/sliding-tabs";
 import { DashboardSummaryData } from "./DashboardTab";
 import { formatCompactIdr, formatIdr } from "@/lib/utils";
 
@@ -286,22 +287,16 @@ export function AnalyticsTab({
                 <option value="netCashflow">Metric: Net Cashflow</option>
               </select>
 
-              <div className="inline-flex rounded-xl border border-borderSubtle bg-elevated p-1">
-                {(["daily", "weekly", "monthly"] as const).map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    onClick={() => setSplineGranularity(g)}
-                    className={`min-h-[32px] rounded-lg px-2.5 py-1 text-xs font-semibold capitalize transition ${
-                      splineGranularity === g
-                        ? "bg-accentPrimary text-white"
-                        : "text-textSecondary hover:text-textPrimary"
-                    }`}
-                  >
-                    {g}
-                  </button>
-                ))}
-              </div>
+              <SlidingTabs
+                layoutGroupId="analyticsSplineGranularitySlide"
+                value={splineGranularity}
+                onChange={setSplineGranularity}
+                options={[
+                  { value: "daily", label: "Daily" },
+                  { value: "weekly", label: "Weekly" },
+                  { value: "monthly", label: "Monthly" },
+                ]}
+              />
             </div>
           </div>
 
@@ -483,30 +478,15 @@ export function AnalyticsTab({
               </h2>
             </div>
 
-            <div className="inline-flex rounded-xl border border-borderSubtle bg-elevated p-0.5">
-              <button
-                type="button"
-                onClick={() => setDonutMode("EXPENSE")}
-                className={`min-h-[32px] rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
-                  donutMode === "EXPENSE"
-                    ? "bg-accentPrimary text-white"
-                    : "text-textSecondary"
-                }`}
-              >
-                Expense
-              </button>
-              <button
-                type="button"
-                onClick={() => setDonutMode("INCOME")}
-                className={`min-h-[32px] rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
-                  donutMode === "INCOME"
-                    ? "bg-accentPrimary text-white"
-                    : "text-textSecondary"
-                }`}
-              >
-                Income
-              </button>
-            </div>
+            <SlidingTabs
+              layoutGroupId="analyticsDonutModeSlide"
+              value={donutMode}
+              onChange={setDonutMode}
+              options={[
+                { value: "EXPENSE", label: "Expense" },
+                { value: "INCOME", label: "Income" },
+              ]}
+            />
           </div>
 
           {donutData.length === 0 ? (
@@ -628,30 +608,15 @@ export function AnalyticsTab({
                 </h2>
               </div>
 
-              <div className="inline-flex rounded-xl border border-borderSubtle bg-elevated p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setRankMode("wallets")}
-                  className={`min-h-[32px] rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
-                    rankMode === "wallets"
-                      ? "bg-accentPrimary text-white"
-                      : "text-textSecondary"
-                  }`}
-                >
-                  Wallets
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRankMode("subcategories")}
-                  className={`min-h-[32px] rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
-                    rankMode === "subcategories"
-                      ? "bg-accentPrimary text-white"
-                      : "text-textSecondary"
-                  }`}
-                >
-                  Subcategories
-                </button>
-              </div>
+              <SlidingTabs
+                layoutGroupId="analyticsRankModeSlide"
+                value={rankMode}
+                onChange={setRankMode}
+                options={[
+                  { value: "wallets", label: "Wallets" },
+                  { value: "subcategories", label: "Subcategories" },
+                ]}
+              />
             </div>
 
             <div className="mt-4 space-y-3">
@@ -720,4 +685,3 @@ export function AnalyticsTab({
     </div>
   );
 }
-

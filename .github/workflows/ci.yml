@@ -16,10 +16,11 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      POSTGRES_PRISMA_URL: "postgresql://dummy:dummy@localhost:5432/wealthydb?schema=public"
-      POSTGRES_URL_NON_POOLING: "postgresql://dummy:dummy@localhost:5432/wealthydb?schema=public"
+      DATABASE_PRISMA_DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/wealthydb?schema=public"
+      DATABASE_POSTGRES_URL: "postgresql://dummy:dummy@localhost:5432/wealthydb?schema=public"
       JWT_SECRET: "ci_dummy_jwt_secret_key_minimum_32_characters_long"
-      APP_PASSCODE: "123456"
+      ADMIN_USERNAME: "admin"
+      ADMIN_PASSWORD: "admin123"
 
     steps:
       - name: Checkout Repository
@@ -52,4 +53,3 @@ jobs:
 
       - name: Run TypeScript Compiler Check
         run: bunx tsc --noEmit
-
