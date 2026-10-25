@@ -37,7 +37,8 @@ export default function WealthyDashboardPage() {
   const [globalFilters, setGlobalFilters] =
     useState<GlobalFilterState>(INITIAL_FILTERS);
   const [chartYear, setChartYear] = useState<number>(new Date().getFullYear());
-  const [incomePeriod, setIncomePeriod] = useState<string>("global");
+  const [incomePeriod, setIncomePeriod] = useState<string>("this_month");
+  const [expensePeriod, setExpensePeriod] = useState<string>("this_month");
 
   const [summaryData, setSummaryData] = useState<DashboardSummaryData | null>(
     null
@@ -92,6 +93,9 @@ export default function WealthyDashboardPage() {
       if (incomePeriod) {
         params.set("incomePeriod", incomePeriod);
       }
+      if (expensePeriod) {
+        params.set("expensePeriod", expensePeriod);
+      }
 
       const response = await fetch(
         `/api/dashboard/summary?${params.toString()}`
@@ -120,7 +124,7 @@ export default function WealthyDashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [globalFilters, chartYear, incomePeriod, router]);
+  }, [globalFilters, chartYear, incomePeriod, expensePeriod, router]);
 
   useEffect(() => {
     fetchDashboardSummary();
@@ -212,6 +216,8 @@ export default function WealthyDashboardPage() {
             onChangeChartYear={setChartYear}
             incomePeriod={incomePeriod}
             onChangeIncomePeriod={setIncomePeriod}
+            expensePeriod={expensePeriod}
+            onChangeExpensePeriod={setExpensePeriod}
             onOpenEditBalance={() => {
               setFocusedWalletId(null);
               setIsEditBalanceOpen(true);

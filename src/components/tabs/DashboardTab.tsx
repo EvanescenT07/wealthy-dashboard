@@ -70,6 +70,8 @@ export interface DashboardSummaryData {
   budget: {
     monthlyLimitIdr: number;
     currentExpenseIdr: number;
+    monthKey?: string;
+    monthLabel?: string;
     utilizationPct: number;
     priorityCategories: Array<{
       category: string;
@@ -166,6 +168,8 @@ interface DashboardTabProps {
   onChangeChartYear: (year: number) => void;
   incomePeriod: string;
   onChangeIncomePeriod: (period: string) => void;
+  expensePeriod: string;
+  onChangeExpensePeriod: (period: string) => void;
   onOpenEditBalance: () => void;
   onOpenImportExcel: () => void;
   onExportPdf: () => void;
@@ -203,6 +207,8 @@ export function DashboardTab({
   onChangeChartYear,
   incomePeriod,
   onChangeIncomePeriod,
+  expensePeriod,
+  onChangeExpensePeriod,
   onOpenEditBalance,
   onOpenImportExcel,
   onExportPdf,
@@ -486,8 +492,32 @@ export function DashboardTab({
                 </div>
               </div>
 
+              <label htmlFor="expense-card-period" className="sr-only">
+                Expense Card Period Filter
+              </label>
+              <select
+                id="expense-card-period"
+                value={expensePeriod}
+                onChange={(e) => onChangeExpensePeriod(e.target.value)}
+                className="min-h-[38px] rounded-lg border border-borderSubtle bg-elevated px-2.5 py-1 text-xs font-medium text-textPrimary"
+              >
+                <option value="global">Global Period</option>
+                <option value="this_month">This Month</option>
+                <option value="last_3_months">3 Months</option>
+                <option value="this_year">This Year</option>
+              </select>
+            </div>
+
+            <div className="mt-4 flex items-baseline justify-between gap-2">
+              <div className="text-2xl font-extrabold text-textPrimary">
+                <AnimatedCounter
+                  value={data.expenseSummary.totalExpense}
+                  format="idr"
+                  isMasked={isMasked}
+                />
+              </div>
               <span
-                className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-bold tabular-nums ${
+                className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-bold tabular-nums ${
                   data.expenseSummary.changePct <= 0
                     ? "bg-semanticIncome/15 text-semanticIncome"
                     : "bg-semanticExpense/15 text-semanticExpense"
@@ -496,14 +526,6 @@ export function DashboardTab({
                 {data.expenseSummary.changePct >= 0 ? "+" : ""}
                 {data.expenseSummary.changePct}% vs prior
               </span>
-            </div>
-
-            <div className="mt-4 text-2xl font-extrabold text-textPrimary">
-              <AnimatedCounter
-                value={data.expenseSummary.totalExpense}
-                format="idr"
-                isMasked={isMasked}
-              />
             </div>
           </div>
 
@@ -565,7 +587,7 @@ export function DashboardTab({
                 Monthly Budget Target
               </h2>
               <p className="text-xs text-slate-300">
-                Spending realization against limit
+                Spending realization ({data.budget.monthLabel ?? "This Month"}) against limit
               </p>
             </div>
             <button
@@ -664,8 +686,11 @@ export function DashboardTab({
                 x="90"
                 y="92"
                 textAnchor="middle"
-                className="fill-slate-300 text-[11px]"
+                className="fill-slate-300 text-[11px] tabular-nums"
               >
+                {isMasked
+                  ? "Rp ••••••"
+                  : formatCompactIdr(data.budget.currentExpenseIdr)}{" "}
                 of {formatCompactIdr(data.budget.monthlyLimitIdr)} limit
               </text>
             </svg>

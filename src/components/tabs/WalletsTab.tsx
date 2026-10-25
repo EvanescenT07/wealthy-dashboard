@@ -189,7 +189,7 @@ export function WalletsTab({
               { value: "all", label: `All (${wallets.length})` },
               {
                 value: "default",
-                label: `Primary 9 (${wallets.filter((w) => w.isDefault).length})`,
+                label: `Primary (${wallets.filter((w) => w.isDefault).length})`,
               },
               {
                 value: "dynamic",
