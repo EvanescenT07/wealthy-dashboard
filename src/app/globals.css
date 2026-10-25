@@ -60,6 +60,21 @@ body {
   background: var(--accent-primary);
 }
 
+/* WebKit Date Picker Indicator Theme Support */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 /* View Transitions API Circular Reveal Reset */
 ::view-transition-old(root),
 ::view-transition-new(root) {
