@@ -70,19 +70,24 @@ export async function GET(request: NextRequest) {
     const categoriesParam = searchParams.get("categories");
     const chartYearParam = searchParams.get("chartYear");
     const incomePeriodParam = searchParams.get("incomePeriod");
+    const expensePeriodParam = searchParams.get("expensePeriod");
 
     const where: Prisma.TransactionWhereInput = {};
     let parsedFrom: Date | null = null;
     let parsedTo: Date | null = null;
 
     if (fromParam) {
-      const d = new Date(fromParam);
+      const fromStr =
+        fromParam.length === 10 ? `${fromParam}T00:00:00.000Z` : fromParam;
+      const d = new Date(fromStr);
       if (!Number.isNaN(d.getTime())) {
         parsedFrom = d;
       }
     }
     if (toParam) {
-      const d = new Date(toParam);
+      const toStr =
+        toParam.length === 10 ? `${toParam}T23:59:59.999Z` : toParam;
+      const d = new Date(toStr);
       if (!Number.isNaN(d.getTime())) {
         parsedTo = d;
       }
@@ -211,6 +216,25 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Independent Expense Card Period Override if selected
+    let expenseSourceTransactions = filteredTransactions;
+    if (expensePeriodParam && expensePeriodParam !== "global") {
+      const now = new Date();
+      let expFrom: Date | null = null;
+      if (expensePeriodParam === "this_month") {
+        expFrom = new Date(now.getFullYear(), now.getMonth(), 1);
+      } else if (expensePeriodParam === "last_3_months") {
+        expFrom = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      } else if (expensePeriodParam === "this_year") {
+        expFrom = new Date(now.getFullYear(), 0, 1);
+      }
+      if (expFrom) {
+        expenseSourceTransactions = filteredTransactions.filter(
+          (tx) => tx.date >= expFrom!
+        );
+      }
+    }
+
     let totalIncome = 0;
     let primaryIncome = 0;
     let otherIncome = 0;
@@ -236,7 +260,7 @@ export async function GET(request: NextRequest) {
       { name: string; color: string; amount: number }
     >();
 
-    for (const tx of filteredTransactions) {
+    for (const tx of expenseSourceTransactions) {
       const amt = Number(tx.amountIdr);
       if (tx.type === "EXPENSE") {
         totalExpense += amt;
@@ -258,7 +282,12 @@ export async function GET(request: NextRequest) {
         };
         wCurrent.amount += amt;
         expenseByWallet.set(tx.walletId, wCurrent);
-      } else {
+      }
+    }
+
+    for (const tx of filteredTransactions) {
+      if (tx.type === "INCOME") {
+        const amt = Number(tx.amountIdr);
         incomeByCategory.set(
           tx.category,
           (incomeByCategory.get(tx.category) ?? 0) + amt
@@ -358,6 +387,60 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    // Monthly Budget Target trimmed from Transaction.date (YYYY-MM)
+    const now = new Date();
+    const currentMonthKey = now.toISOString().slice(0, 7);
+    let budgetMonthKey = currentMonthKey;
+    const hasCurrentMonthTx = allTxYearsRaw.some(
+      (t) => t.date.toISOString().slice(0, 7) === currentMonthKey
+    );
+    if (!hasCurrentMonthTx && allTxYearsRaw.length > 0) {
+      budgetMonthKey = allTxYearsRaw[0].date.toISOString().slice(0, 7);
+    }
+    if (parsedFrom) {
+      budgetMonthKey = parsedFrom.toISOString().slice(0, 7);
+    }
+
+    const [bYearStr, bMonthStr] = budgetMonthKey.split("-");
+    const bYear = parseInt(bYearStr, 10);
+    const bMonthIndex = parseInt(bMonthStr, 10) - 1;
+    const budgetMonthStart = new Date(Date.UTC(bYear, bMonthIndex, 1, 0, 0, 0));
+    const budgetMonthEnd = new Date(Date.UTC(bYear, bMonthIndex + 1, 0, 23, 59, 59, 999));
+
+    const budgetMonthTransactions = await prisma.transaction.findMany({
+      where: {
+        type: "EXPENSE",
+        date: { gte: budgetMonthStart, lte: budgetMonthEnd },
+        ...(walletsParam ? { walletId: where.walletId } : {}),
+      },
+      select: {
+        category: true,
+        amountIdr: true,
+      },
+    });
+
+    let currentMonthlyExpense = 0;
+    const budgetCategoryMap = new Map<string, number>();
+    for (const tx of budgetMonthTransactions) {
+      const amt = Number(tx.amountIdr);
+      currentMonthlyExpense += amt;
+      budgetCategoryMap.set(
+        tx.category,
+        (budgetCategoryMap.get(tx.category) ?? 0) + amt
+      );
+    }
+
+    const budgetPriorityCategories = Array.from(budgetCategoryMap.entries())
+      .map(([category, amount]) => ({
+        category,
+        amount,
+        percentage:
+          currentMonthlyExpense > 0
+            ? Number(((amount / currentMonthlyExpense) * 100).toFixed(1))
+            : 0,
+      }))
+      .sort((a, b) => b.amount - a.amount);
+
     const visibleWallets = wallets.filter((w) => w.isVisible);
     const totalManualBalance = visibleWallets.reduce(
       (sum, w) => sum + Number(w.manualBalance),
@@ -414,12 +497,20 @@ export async function GET(request: NextRequest) {
         },
         budget: {
           monthlyLimitIdr: monthlyLimitNum,
-          currentExpenseIdr: totalExpense,
+          currentExpenseIdr: currentMonthlyExpense,
+          monthKey: budgetMonthKey,
+          monthLabel: new Intl.DateTimeFormat("en-US", {
+            month: "short",
+            year: "numeric",
+            timeZone: "UTC",
+          }).format(budgetMonthStart),
           utilizationPct:
             monthlyLimitNum > 0
-              ? Number(((totalExpense / monthlyLimitNum) * 100).toFixed(1))
+              ? Number(
+                  ((currentMonthlyExpense / monthlyLimitNum) * 100).toFixed(1)
+                )
               : 0,
-          priorityCategories: sortedExpenseCategories.slice(0, 4),
+          priorityCategories: budgetPriorityCategories.slice(0, 4),
         },
         monthlyOverview: {
           selectedYear: selectedChartYear,

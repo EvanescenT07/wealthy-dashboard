@@ -49,13 +49,17 @@ export async function GET(request: NextRequest) {
 
     const dateFilter: Prisma.DateTimeFilter = {};
     if (fromParam) {
-      const parsedFrom = new Date(fromParam);
+      const fromStr =
+        fromParam.length === 10 ? `${fromParam}T00:00:00.000Z` : fromParam;
+      const parsedFrom = new Date(fromStr);
       if (!Number.isNaN(parsedFrom.getTime())) {
         dateFilter.gte = parsedFrom;
       }
     }
     if (toParam) {
-      const parsedTo = new Date(toParam);
+      const toStr =
+        toParam.length === 10 ? `${toParam}T23:59:59.999Z` : toParam;
+      const parsedTo = new Date(toStr);
       if (!Number.isNaN(parsedTo.getTime())) {
         dateFilter.lte = parsedTo;
       }

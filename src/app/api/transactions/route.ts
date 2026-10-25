@@ -23,13 +23,17 @@ export async function GET(request: NextRequest) {
     if (fromParam || toParam) {
       baseWhere.date = {};
       if (fromParam) {
-        const d = new Date(fromParam);
+        const fromStr =
+          fromParam.length === 10 ? `${fromParam}T00:00:00.000Z` : fromParam;
+        const d = new Date(fromStr);
         if (!Number.isNaN(d.getTime())) {
           baseWhere.date.gte = d;
         }
       }
       if (toParam) {
-        const d = new Date(toParam);
+        const toStr =
+          toParam.length === 10 ? `${toParam}T23:59:59.999Z` : toParam;
+        const d = new Date(toStr);
         if (!Number.isNaN(d.getTime())) {
           baseWhere.date.lte = d;
         }
