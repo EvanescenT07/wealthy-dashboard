@@ -1,10 +1,20 @@
+import { NextRequest } from "next/server";
 import { SignJWT, jwtVerify, errors as JoseErrors } from "jose";
 
 export const SESSION_COOKIE_NAME = "wealthy_session";
 
 function getJwtSecretKey(): Uint8Array {
-  const secret =
-    process.env.JWT_SECRET ?? "wealthy_dashboard_fallback_dev_secret_32_chars";
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "[SECURITY FATAL] JWT_SECRET must be configured with at least 32 characters in production."
+      );
+    }
+    return new TextEncoder().encode(
+      "wealthy_dashboard_fallback_dev_secret_32_chars"
+    );
+  }
   return new TextEncoder().encode(secret);
 }
 
@@ -64,4 +74,11 @@ export async function verifySessionToken(
     console.error("[Auth] Unexpected JWT verification failure:", error);
     return null;
   }
+}
+
+export async function requireAuthSession(
+  request: NextRequest
+): Promise<SessionPayload | null> {
+  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  return verifySessionToken(token);
 }

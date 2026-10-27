@@ -1,11 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
+import { requireAuthSession } from "@/lib/auth";
 import { parseExcelTransactions } from "@/lib/excel";
 import { prisma, serializeBigInt } from "@/lib/prisma";
 import { resolveWalletStyle, slugifyWalletName } from "@/lib/utils";
 
-export async function GET() {
+const MAX_IMPORT_BYTES = 10 * 1024 * 1024; // 10 MB ceiling to prevent decompression bomb DoS
+
+export async function GET(request: NextRequest) {
   try {
+    const session = await requireAuthSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized access." },
+        { status: 401 }
+      );
+    }
+
     const logs = await prisma.importLog.findMany({
       orderBy: { importedAt: "desc" },
       take: 50,
@@ -22,6 +33,14 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await requireAuthSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized access." },
+        { status: 401 }
+      );
+    }
+
     const formData = await request.formData();
     const uploadedFile = formData.get("file");
 
@@ -32,7 +51,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (uploadedFile.size > MAX_IMPORT_BYTES) {
+      return NextResponse.json(
+        { error: "File exceeds 10MB limit. Decompression bomb protection triggered." },
+        { status: 413 }
+      );
+    }
+
     const fileName = uploadedFile.name || "Uploaded_Transactions.xlsx";
+    const lowerName = fileName.toLowerCase();
+    if (!lowerName.endsWith(".xlsx") && !lowerName.endsWith(".xls")) {
+      return NextResponse.json(
+        { error: "Invalid file extension. Only .xlsx and .xls are supported." },
+        { status: 400 }
+      );
+    }
+
     const arrayBuffer = await uploadedFile.arrayBuffer();
     const { rows, totalRowsRead } = parseExcelTransactions(arrayBuffer);
 

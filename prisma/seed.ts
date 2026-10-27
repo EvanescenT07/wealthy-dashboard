@@ -17,14 +17,17 @@ const DEFAULT_WALLETS = [
 
 export async function runSeed() {
   const adminUsername = (process.env.ADMIN_USERNAME ?? "admin").trim().toLowerCase();
-  const adminPassword = (process.env.ADMIN_PASSWORD ?? "admin123").trim();
+  const adminPassword = process.env.ADMIN_PASSWORD?.trim();
+  if (!adminPassword && process.env.NODE_ENV === "production") {
+    throw new Error("[SECURITY FATAL] Refusing to seed admin user with default credentials in production.");
+  }
 
   await prisma.user.upsert({
     where: { username: adminUsername },
     update: {},
     create: {
       username: adminUsername,
-      passwordHash: hashPassword(adminPassword),
+      passwordHash: hashPassword(adminPassword ?? "admin123"),
       displayName: "Primary Account Owner",
     },
   });

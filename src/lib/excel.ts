@@ -154,7 +154,12 @@ export function parseExcelTransactions(buffer: ArrayBuffer): {
   rows: ParsedExcelRow[];
   totalRowsRead: number;
 } {
-  const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
+  const workbook = XLSX.read(buffer, {
+    type: "array",
+    cellDates: true,
+    cellFormula: false,
+    cellHTML: false,
+  });
   const firstSheetName = workbook.SheetNames[0];
   if (!firstSheetName) {
     return { rows: [], totalRowsRead: 0 };
