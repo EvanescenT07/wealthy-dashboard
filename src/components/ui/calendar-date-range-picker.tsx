@@ -46,12 +46,14 @@ export function CalendarDateRangePicker({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- selected range is re-synced from controlled props */
   useEffect(() => {
     setRangeStart(from ? parseISO(from) : null);
     if (from) {
       setCurrentMonth(parseISO(from));
     }
   }, [from, to]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

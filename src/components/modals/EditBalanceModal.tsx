@@ -37,6 +37,7 @@ export function EditBalanceModal({
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- editable drafts are initialized from wallet props when the modal opens */
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -54,6 +55,7 @@ export function EditBalanceModal({
     setDrafts(nextDrafts);
     setErrorMessage(null);
   }, [isOpen, wallets]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (!isOpen) {
