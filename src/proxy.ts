@@ -9,7 +9,7 @@ const PUBLIC_API_PATHS = new Set([
 
 const PUBLIC_PAGE_PATHS = new Set(["/login", "/register"]);
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (

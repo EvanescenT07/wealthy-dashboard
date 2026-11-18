@@ -98,9 +98,11 @@ export function WalletsTab({
     }
   }, [from, to]);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- data load, loading state is set by the fetch callback */
   useEffect(() => {
     fetchWallets();
   }, [fetchWallets, refreshTrigger]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleToggleVisibility = async (wallet: EnrichedWallet) => {
     setTogglingId(wallet.id);

@@ -52,12 +52,14 @@ export default function WealthyDashboardPage() {
   const [isEditBalanceOpen, setIsEditBalanceOpen] = useState<boolean>(false);
   const [focusedWalletId, setFocusedWalletId] = useState<string | null>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- browser-only preference is restored after mount to keep SSR markup stable */
   useEffect(() => {
     const savedMask = localStorage.getItem("wealthy_privacy_mask");
     if (savedMask === "true") {
       setIsMasked(true);
     }
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleToggleMask = () => {
     setIsMasked((prev) => {
@@ -126,9 +128,11 @@ export default function WealthyDashboardPage() {
     }
   }, [globalFilters, chartYear, incomePeriod, expensePeriod, router]);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- initial dashboard data load, loading state is set by the fetch callback */
   useEffect(() => {
     fetchDashboardSummary();
   }, [fetchDashboardSummary, refreshTrigger]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const triggerGlobalRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);
@@ -152,7 +156,11 @@ export default function WealthyDashboardPage() {
       params.set("type", globalFilters.type);
     }
     const qs = params.toString();
-    window.location.href = `/api/export/excel${qs ? `?${qs}` : ""}`;
+    const link = document.createElement("a");
+    link.href = `/api/export/excel${qs ? `?${qs}` : ""}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
 
   const handleExportPdf = () => {

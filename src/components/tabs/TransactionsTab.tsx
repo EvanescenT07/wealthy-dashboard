@@ -93,10 +93,12 @@ export function TransactionsTab({
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [page, setPage] = useState(1);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- local pill filter follows the global filter and resets pagination */
   useEffect(() => {
     setPillType(globalFilters.type);
     setPage(1);
   }, [globalFilters.type]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -159,9 +161,11 @@ export function TransactionsTab({
     globalFilters.to,
   ]);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- data load, loading state is set by the fetch callback */
   useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions, refreshTrigger]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (isLoading && !data) {
     return (

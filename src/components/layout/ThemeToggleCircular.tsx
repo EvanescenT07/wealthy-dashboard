@@ -22,6 +22,7 @@ export function ThemeToggleCircular() {
   } | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- stored theme is read after mount to keep SSR markup stable */
   useEffect(() => {
     const saved = localStorage.getItem("wealthy_theme");
     const prefersDark =
@@ -30,6 +31,7 @@ export function ThemeToggleCircular() {
     setIsDark(prefersDark);
     document.documentElement.classList.toggle("dark", prefersDark);
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const applyThemeDom = (nextDark: boolean) => {
     setIsDark(nextDark);

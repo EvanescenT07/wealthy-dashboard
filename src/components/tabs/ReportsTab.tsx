@@ -46,7 +46,11 @@ export function ReportsTab({ data, onOpenImportExcel }: ReportsTabProps) {
 
   const handleExportExcel = () => {
     const qs = buildQueryString();
-    window.location.href = `/api/export/excel${qs ? `?${qs}` : ""}`;
+    const link = document.createElement("a");
+    link.href = `/api/export/excel${qs ? `?${qs}` : ""}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
 
   const handleExportPdf = async () => {
